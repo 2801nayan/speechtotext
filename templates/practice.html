@@ -54,27 +54,38 @@
 
         </div>
 
-     
+
 
 
         <!-- create a button named start,which will start speech to text -->
         <div class="col-md-4 offset-md-4">
             <button id="start" class="btn btn-success">Start</button>
-            <button id="stop" class="btn btn-danger">Stop</button>
-            <button id="compare" onclick="compare()" class="btn btn-success">Compare</button>
+            <!-- <button id="stop" class="btn btn-danger">Stop</button> -->
+            <button id="compare" onclick="compare()" class="btn btn-success">Stop</button>
             <button id="reset" onclick="reset()" class="btn btn-warning">Reset</button>
 
             <!-- javascript code to start speech to text and compare the words user has said with the paragraph words -->
             <script>
+                document.getElementById('compare').addEventListener('click', function () {
+                    var paragraph = document.getElementById('paragraph');
+                    var start = document.getElementById('start');
+                    var stop = document.getElementById('compare');
+                    var recognition = new webkitSpeechRecognition();
+                    recognition.stop();
+                    start.disabled = false;
+                    stop.disabled = true;
+                });
+                var recognition = new webkitSpeechRecognition();
+
                 document.getElementById('start').addEventListener('click', function () {
                     var paragraph = document.getElementById('user_words');
                     var start = document.getElementById('start');
-                    var stop = document.getElementById('stop');
-                    var recognition = new webkitSpeechRecognition();
+                    var compare = document.getElementById('compare');
                     recognition.continuous = true;
                     recognition.interimResults = true;
                     recognition.lang = 'en-US';
                     recognition.start();
+
                     recognition.onresult = function (event) {
                         var interim_transcript = '';
                         for (var i = event.resultIndex; i < event.results.length; i++) {
@@ -87,18 +98,12 @@
                         }
                         paragraph.innerHTML = interim_transcript;
                     }
+
                     start.disabled = true;
-                    stop.disabled = false;
+                    compare.disabled = false;
                 });
-                document.getElementById('stop').addEventListener('click', function () {
-                    var paragraph = document.getElementById('paragraph');
-                    var start = document.getElementById('start');
-                    var stop = document.getElementById('stop');
-                    var recognition = new webkitSpeechRecognition();
-                    recognition.stop();
-                    start.disabled = false;
-                    stop.disabled = true;
-                });
+
+
 
                 ///javascript code to compare the words user has said with the paragraph words 
                 var words;
@@ -120,13 +125,12 @@
                             if (words[i] == user_words_array[j]) {
                                 count++;
                                 correct_words_array.push(words[i]);
-
                             }
                         }
                     }
-                    // fimnd the number of unique correct words specified by the user
+                    // find the number of unique correct words specified by the user
                     correct_words_array.shift();
-                    let unique_correct_words_array = [...new Set(correct_words_array)]; // create a new array without duplicates
+                    let unique_correct_words_array = [...new Set(correct_words_array)];
                     var poitns = unique_correct_words_array.length * 10;
                     console.log("Unique Words: -> ", unique_correct_words_array);
                     console.log("Unique words length ->", unique_correct_words_array.length);
@@ -144,7 +148,6 @@
                     //calculate the percentage of correct words
                     var percentage = (poitns / TotalPoitns) * 100;
 
-                    // generate grade from percentage. if percentage is greater than 80 then grade is A else if percentage is greater than 60 then grade is B else if percentage is greater than 40 then grade is C else if percentage is greater than 20 then grade is D else grade is F
                     if (percentage > 80) {
                         var grade = "A";
                     } else if (percentage > 60) {
@@ -170,7 +173,7 @@
                     document.getElementById('p').value = user_scored;
                     document.getElementById('c').value = unique_correct_words_array;
                     document.getElementById('grade').value = grade;
-                    
+
                 }
 
                 //javascript code to reset the page
@@ -183,7 +186,6 @@
 
                     document.getElementById('points').innerHTML = " ";
 
-                    //console all data
                     console.log("Words: -> ", words);
                     console.log("Count:->", count);
                     console.log("correct_words_array:-> ", correct_words_array);
@@ -194,17 +196,14 @@
             </script>
             <br><br>
             <form method="post" id="submitForm" action="/submitpoint">
-
-
                 {% csrf_token %}
                 <input type="hidden" name="points" id="p">
                 <input type="hidden" id="c" name="correctwords">
                 <input type="hidden" name="title" value="{{ title }}">
-                <input type="hidden" name="grade" id="grade"  >
+                <input type="hidden" name="grade" id="grade">
                 <button id="submit" class="btn btn-success">Submit Data</button>
             </form>
         </div>
-
     </div>
 
 </body>
